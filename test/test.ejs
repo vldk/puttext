@@ -7,11 +7,15 @@
         <li><%= __("one item left from {max}", "items {x} left from {max}", items, {x: items, max: max} )  %></li>
     <%
     }
+    //duplicate test (usage in several places or files the same phrase)
     %>
+    <li><%=__("just a test")%></li>
 </ul>
 
 <script type="text/javascript">
     console.log(__("inline EJS script code"));
+
+    console.log(__(/*one more duplicate test*/"just a test"));
 </script>
 
 <script>

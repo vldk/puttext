@@ -22,24 +22,26 @@ msgstr ""
 msgid "EJS simple test"
 msgstr "простий тест EJS"
 
-#: test\test.ejs:19
-msgid "another EJS code"
-msgstr "інший код на EJS"
-
-#: test\test.ejs:14
-msgid "inline EJS script code"
-msgstr "код в середині тегу script в EJS"
-
-#: test\test.js:3
-msgid "just a test"
-msgstr "просто тест"
-
 #: test\test.ejs:7
 msgid "one item left from {max}"
 msgid_plural "items {x} left from {max}"
 msgstr[0] "залишилась {x} штучка із {max}"
-msgstr[1] "залишилось {x} штучок із {max}"
+msgstr[1] "залишилось {x} штучки із {max}"
 msgstr[2] "залишилось {x} штучок із {max}"
+
+#. one more duplicate test
+#. duplicate test
+#: test\test.js:3 test\test.ejs:19 test\test.ejs:18 test\test.ejs:12
+msgid "just a test"
+msgstr "просто тест"
+
+#: test\test.ejs:16
+msgid "inline EJS script code"
+msgstr "код в середині тегу script в EJS"
+
+#: test\test.ejs:24
+msgid "another EJS code"
+msgstr "інший код на EJS"
 
 #. some notes
 #: test\test.js:4

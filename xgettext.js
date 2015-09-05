@@ -67,23 +67,27 @@ function extract(fn, markers) {
     return results;
 }
 
-
-function walk(filepath, callback) {
-    return fs.stat(filepath, function(err, stat) {
-        if (err) {
-            return callback(err);
-        }
-
-        if (stat.isDirectory()) {
-            return fs.readdir(filepath, function(err, files) {
-                return files.forEach(function(fn) {
-                    return walk(path.join(filepath, fn), callback);
-                });
+/**
+ *
+ * @param filepath
+ * @param callback
+ * @returns {Array}
+ */
+function walkSync(filepath, callback) {
+    try {
+        if (fs.statSync(filepath).isDirectory()) {
+            return fs.readdirSync(filepath).map(function(fn) {
+                return walkSync(path.join(filepath, fn), callback);
             });
         } else if (path.extname(filepath).substr(1).toUpperCase() in parsers) {
             return callback(null, filepath);
+        } else {
+            return [];
         }
-    });
+
+    } catch (err){
+        return callback(err);
+    }
 }
 
 
@@ -127,7 +131,7 @@ function extract_comments(msg) {
     }
 }
 
-var uniq = [],
+var uniq = {},
     toString$ = ({}).toString;
 
 function process_main(fn, markers) {
@@ -139,19 +143,26 @@ function process_main(fn, markers) {
     console.log(
         'msgid ""\nmsgstr ""\n"Content-Type: text/plain; charset=UTF-8\\n"\n');
 
-    return walk(fn, function(err, fn) {
 
+
+    walkSync(fn, function(err, fn) {
         if(err){
             console.log(err);
             return;
         }
 
-        var messages = extract(fn, markers), msg, comment, _key;
+        return extract(fn, markers);
+    }).forEach(function (file_messages) {
+        if(!file_messages.length){
+            return;
+        }
 
-        for (var i = 0; i < messages.length; i++) {
+        var msg, comment, _key;
+
+        for (var i = 0; i < file_messages.length; i++) {
             //comment is an array
-            comment = messages[i][0];
-            msg = messages[i][1];
+            comment = file_messages[i][0];
+            msg = file_messages[i][1];
 
             // hard stop if we received something strange
             if (msg === undefined) {
@@ -161,13 +172,25 @@ function process_main(fn, markers) {
 
             // output message string
             _key = toString$.call(msg).slice(8,-1) === "Array" ? msg.join("|") : msg;
-            if (!~uniq.indexOf(_key)) {
-                uniq.push(_key);
-                console.log(comment.join("\n"));
-                console.log(format_msgid(msg));
+            if(!uniq.hasOwnProperty(_key)){
+                uniq[_key] = {
+                    comment: comment,
+                    msg: msg
+                };
+            }
+            //process duplicates,
+            else {
+                uniq[_key].comment = [].concat(uniq[_key].comment, comment).sort().reverse();
             }
         }
     });
+
+    for(var _key in uniq){
+        console.log(uniq[_key].comment.join("\n"));
+        console.log(format_msgid(uniq[_key].msg));
+    }
+
+
 }
 
 function run() {
